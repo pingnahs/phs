@@ -1,0 +1,138 @@
+/* ============================================================
+   portal.css — Member portal: compact segmented nav, profile
+   header, chanda status, payment history/upload. Shares tokens
+   and .stat/.chip/.btn/.form-card/.field from main.css.
+   Every selector below already existed previously — only the
+   visual treatment changed.
+   ============================================================ */
+
+.portal-nav{background:rgba(255,255,255,.94);border-bottom:1px solid var(--line);position:sticky;top:64px;z-index:90;
+  -webkit-backdrop-filter:saturate(180%) blur(8px);backdrop-filter:saturate(180%) blur(8px)}
+.portal-nav .chips{margin:0;padding:.6rem 1rem;flex-wrap:nowrap;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.portal-nav .chips::-webkit-scrollbar{display:none}
+.portal-nav .chip{white-space:nowrap;flex:0 0 auto}
+.portal-nav .chip[aria-current="page"]{background:linear-gradient(135deg,var(--green-600),var(--green-700));
+  border-color:var(--green-700);color:#fff;font-weight:700;box-shadow:var(--shadow-brand)}
+@media(min-width:900px){.portal-nav{top:72px}}
+.portal-main{padding-bottom:3rem}
+
+/* ---- profile header ---- */
+.member-head{display:flex;align-items:center;gap:1rem;position:relative;overflow:hidden;
+  background:linear-gradient(120deg,var(--green-800),var(--green-600) 70%);
+  border:1px solid var(--line);border-radius:var(--radius-lg);padding:1.3rem 1.4rem;
+  box-shadow:var(--shadow-md);color:#fff}
+.member-head::after{content:'';position:absolute;right:-50px;top:-60px;width:180px;height:180px;
+  border-radius:50%;background:rgba(255,255,255,.08)}
+.avatar{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.16);
+  display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;
+  font-size:1.4rem;flex:0 0 auto;overflow:hidden;box-shadow:0 0 0 3px rgba(255,255,255,.35);
+  position:relative;z-index:1}
+/* §Image fix: object-fit only affects the <img> itself, not this wrapping
+   div — without this rule a photo would stretch/distort instead of cropping
+   to a circle like the initials placeholder does. */
+.avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.member-head h1{font-size:1.2rem;margin:0;color:#fff;position:relative;z-index:1}
+.member-head h1::after{display:none}
+.member-head .code{color:rgba(255,255,255,.85);font-size:.86rem;position:relative;z-index:1}
+
+/* ---- chanda status ---- */
+.stat-grid-3{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem}
+@media(min-width:680px){.stat-grid-3{grid-template-columns:repeat(4,1fr)}}
+.month-row{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line-strong);
+  border-radius:12px;padding:.9rem 1.05rem;margin-bottom:.65rem;display:flex;align-items:center;
+  gap:.85rem;flex-wrap:wrap;transition:box-shadow var(--t-fast),border-color var(--t-fast);box-shadow:var(--shadow-xs)}
+.month-row:hover{box-shadow:var(--shadow-sm)}
+.month-row .m-title{font-weight:700;min-width:110px}
+.month-row .m-amt{color:var(--muted);font-size:.88rem;font-variant-numeric:tabular-nums}
+.month-row .grow{flex:1}
+.badge-paid{background:var(--green-soft);color:var(--green-800)}
+.badge-partial{background:var(--gold-100);color:#7a5c00}
+.badge-due{background:var(--danger-soft);color:var(--danger)}
+.badge-pending{background:var(--info-soft);color:var(--info)}
+.badge-na{background:#eef0ef;color:#5a6660}
+.badge-rejected{background:var(--danger-soft);color:var(--danger)}
+
+/* left accent per status, matched to the badge palette above */
+.month-row:has(.badge-paid){border-left-color:var(--green-500)}
+.month-row:has(.badge-partial){border-left-color:var(--gold-500)}
+.month-row:has(.badge-due){border-left-color:var(--danger)}
+.month-row:has(.badge-pending){border-left-color:var(--info)}
+.month-row:has(.badge-rejected){border-left-color:var(--danger)}
+
+.sum-band{display:flex;flex-wrap:wrap;gap:.6rem 1.5rem;background:var(--green-50);
+  border:1px solid #cfe3d5;border-radius:var(--radius);padding:.9rem 1.1rem;font-size:.93rem;margin-bottom:1.1rem}
+.sum-band b{color:var(--green-800)}
+
+/* ---- payment method / upload ---- */
+.method-card{border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:.95rem 1.05rem;
+  margin-bottom:.7rem;cursor:pointer;background:#fff;display:block;transition:border-color var(--t-fast),
+  background var(--t-fast),box-shadow var(--t-fast)}
+.method-card:hover{border-color:var(--green-400);box-shadow:var(--shadow-xs)}
+.method-card input{margin-right:.5rem;transform:scale(1.25);accent-color:var(--green-600)}
+.method-card:has(input:checked){border-color:var(--green-600);background:var(--green-50);box-shadow:var(--shadow-sm)}
+.method-card .acc{font-family:ui-monospace,monospace;font-size:1.02rem;letter-spacing:.5px}
+.copy-btn{border:1px solid var(--line-strong);background:#fff;border-radius:8px;padding:.25rem .65rem;
+  font-size:.8rem;cursor:pointer;font-family:var(--font);font-weight:600;transition:background var(--t-fast)}
+.copy-btn:hover{background:var(--green-50);border-color:var(--green-500)}
+.preview-box{position:relative;display:inline-block;margin-top:.6rem}
+.preview-box img{max-height:160px;border-radius:var(--radius-sm);border:1px solid var(--line);box-shadow:var(--shadow-xs)}
+.preview-remove{position:absolute;top:-9px;right:-9px;background:var(--danger);color:#fff;
+  border:2px solid #fff;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:1rem;line-height:1;
+  box-shadow:var(--shadow-sm)}
+.step-note{font-size:.85rem;color:var(--muted);margin:.35rem 0 .9rem}
+.form-actions{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.2rem}
+
+/* ---- history filters / kv ---- */
+.filter-bar{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.1rem}
+.filter-bar select,.filter-bar input{font-family:var(--font);font-size:.95rem;
+  padding:.58rem .75rem;border:1.5px solid var(--line-strong);border-radius:var(--radius-sm);
+  min-height:44px;background:var(--card)}
+.kv{display:grid;grid-template-columns:1fr;gap:.6rem}
+@media(min-width:640px){.kv{grid-template-columns:1fr 1fr}}
+.kv .row{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:.72rem .95rem}
+.kv .row .k{color:var(--muted);font-size:.8rem;font-weight:600}
+.kv .row .v{font-weight:700;word-break:break-word}
+.logout-btn{background:none;border:1.5px solid var(--line-strong);border-radius:var(--radius-sm);
+  padding:.5rem .95rem;font-family:var(--font);cursor:pointer;color:var(--danger);
+  font-weight:700;min-height:44px;transition:background var(--t-fast)}
+.logout-btn:hover{background:var(--danger-soft)}
+.select-all-row{display:flex;align-items:center;gap:.5rem;font-weight:700;margin-bottom:.65rem;cursor:pointer}
+.select-all-row input{transform:scale(1.2);accent-color:var(--green-600)}
+.amount-total{font-size:1.45rem;font-weight:800;color:var(--green-800);background:var(--green-50);
+  border:1px solid #cfe3d5;border-radius:var(--radius-sm);padding:.65rem 1rem;display:inline-block}
+.big-alert{border-radius:var(--radius-sm);padding:1.05rem 1.15rem;margin:1.05rem 0;font-weight:600}
+.big-alert-warn{background:var(--gold-100);border:1px solid #ecd9a0;color:#6b4d00}
+.spin{display:inline-block;width:1em;height:1em;border:2.5px solid rgba(255,255,255,.4);
+  border-top-color:#fff;border-radius:50%;animation:phsspin .8s linear infinite;vertical-align:-.15em}
+@keyframes phsspin{to{transform:rotate(360deg)}}
+
+/* ---- §Finance: member-facing Expenditure/Donation cards + trend chart ---- */
+.fin-row{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--green-500);
+  border-radius:12px;padding:.85rem 1.05rem;margin-bottom:.6rem;box-shadow:var(--shadow-xs)}
+.fin-row.is-donation{border-left-color:var(--gold-500)}
+.fin-row .fin-top{display:flex;justify-content:space-between;gap:.8rem;flex-wrap:wrap;align-items:baseline}
+.fin-row .fin-purpose{font-weight:700;word-break:break-word}
+.fin-row .fin-amt{font-weight:800;color:var(--green-800);white-space:nowrap;font-variant-numeric:tabular-nums}
+.fin-row.is-donation .fin-amt{color:#7a5c00}
+.fin-row .fin-meta{color:var(--muted);font-size:.83rem;margin-top:.25rem;word-break:break-word}
+.load-more{width:100%;margin-top:.4rem}
+.fin-chart{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:1rem 1.1rem 1.3rem;box-shadow:var(--shadow-xs)}
+.fin-chart-bars{display:flex;align-items:flex-end;gap:.5rem;height:170px;
+  border-bottom:1px solid var(--line);padding-bottom:.4rem;overflow-x:auto}
+.fin-chart-col{flex:1 0 30px;min-width:30px;display:flex;flex-direction:column;
+  align-items:center;height:100%;justify-content:flex-end}
+.fin-chart-bar-pair{display:flex;align-items:flex-end;gap:3px;height:100%;width:100%;justify-content:center}
+.fin-bar{width:9px;border-radius:4px 4px 0 0;min-height:2px;transition:height var(--t-slow) var(--ease)}
+.fin-bar-income{background:var(--green-500)}
+.fin-bar-exp{background:var(--marigold-deep)}
+.fin-chart-label{font-size:.65rem;color:var(--muted);margin-top:.4rem;text-align:center;white-space:nowrap}
+.fin-chart-legend{display:flex;gap:1rem;justify-content:center;margin-top:.85rem;
+  font-size:.8rem;color:var(--muted);font-weight:600}
+.fin-dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:.35rem}
+.fin-dot-income{background:var(--green-500)}
+.fin-dot-exp{background:var(--marigold-deep)}
+.stat-balance-pos .v{color:var(--green-600)}
+.stat-balance-neg .v{color:var(--danger)}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>অ্যাডমিন লগইন — পিংনা হিতৈষী সংঘ</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body data-page="a-login">
+<header class="site-header"><div class="container header-in">
+<a class="brand" href="../index.html"><span class="brand-name"><span>পিংনা হিতৈষী সংঘ</span>
+<small>অ্যাডমিন প্যানেল</small></span></a></div></header>
+<main class="login-wrap">
+<form class="form-card" id="lg-form" novalidate style="width:min(94vw,420px)">
+<h1>অ্যাডমিন লগইন</h1>
+<div id="lg-alert" class="form-alert form-alert-error" role="alert" tabindex="-1" hidden></div>
+<div class="field"><label class="req" for="lg-email">ইমেইল বা ইউজারনেম</label>
+<input id="lg-email" autocomplete="username"><span class="err" aria-live="polite"></span></div>
+<div class="field"><label class="req" for="lg-pass">পাসওয়ার্ড</label>
+<input id="lg-pass" type="password" autocomplete="current-password"><span class="err" aria-live="polite"></span></div>
+<button type="submit" class="btn btn-primary">লগইন</button>
+</form>
+</main>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>আর্থিক তথ্য — সদস্য পোর্টাল</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<link rel="stylesheet" href="../assets/css/portal.css?v=20260909">
+</head>
+<body data-page="m-finance">
+<a class="skip-link" href="#main">মূল কন্টেন্টে যান</a>
+<header id="site-header" class="site-header"></header>
+<nav class="portal-nav" id="portal-nav" aria-label="পোর্টাল মেনু">
+  <div class="container"><div class="chips" role="group"></div></div>
+</nav>
+<main id="main" class="portal-main">
+<section class="section"><div class="container">
+  <h1>সংগঠনের আর্থিক তথ্য</h1>
+  <p class="step-note">এখানে সংগঠনের সামগ্রিক আয়-ব্যয়ের তথ্য দেখানো হয়েছে। অন্য কোনো সদস্যের ব্যক্তিগত চাঁদা/পেমেন্ট তথ্য এখানে দেখানো হয় না।</p>
+  <div id="fin-sum"></div>
+  <h2 class="mt">মাসিক আয় বনাম ব্যয় (গত ১২ মাস)</h2>
+  <div id="fin-chart-box"></div>
+  <h2 class="mt">ব্যয়ের বিস্তারিত তালিকা</h2>
+  <div class="filter-bar">
+    <input id="fx-cat" placeholder="ক্যাটাগরি দিয়ে খুঁজুন">
+    <input id="fx-df" type="date" title="তারিখ (থেকে)" aria-label="তারিখ (থেকে)">
+    <input id="fx-dt" type="date" title="তারিখ (পর্যন্ত)" aria-label="তারিখ (পর্যন্ত)">
+  </div>
+  <div id="fin-exp"></div>
+  <h2 class="mt">সাম্প্রতিক অনুদান</h2>
+  <div id="fin-don"></div>
+</div></section>
+</main>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/member.js?v=20260909"></script>
+</body>
+</html>

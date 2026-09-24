@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /member/
+Disallow: /admin/
+
+Sitemap: https://engr-rabbi.github.io/phs/sitemap.xml

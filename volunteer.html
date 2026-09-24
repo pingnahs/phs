@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>স্বেচ্ছাসেবক হোন — পিংনা হিতৈষী সংঘ</title>
+<meta name="description" content="পিংনা হিতৈষী সংঘে স্বেচ্ছাসেবক হিসেবে যুক্ত হোন — শিক্ষা, খাদ্য বণ্টন, চিকিৎসা ও দুর্যোগ সহায়তায় পাশে দাঁড়ান।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body data-page="volunteer">
+<a class="skip-link" href="#main">মূল কন্টেন্টে যান</a>
+<header id="site-header" class="site-header"></header>
+<main id="main">
+<div class="page-head"><div class="container"><h1>স্বেচ্ছাসেবক হোন</h1>
+<p class="muted">আপনিও পাশে দাঁড়াতে পারেন</p></div></div>
+<section class="section"><div class="container">
+<form class="form-card" id="volunteer-form" novalidate>
+<div class="form-alert form-alert-error" role="alert" tabindex="-1" hidden></div>
+<div class="field"><label class="req" for="v-name">নাম</label>
+<input id="v-name" name="name" autocomplete="name" required><span class="err" aria-live="polite"></span></div>
+<div class="field"><label class="req" for="v-phone">মোবাইল নম্বর</label>
+<input id="v-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required>
+<span class="err" aria-live="polite"></span></div>
+<div class="field"><label for="v-email">ইমেইল (ঐচ্ছিক)</label>
+<input id="v-email" name="email" type="email" autocomplete="email"><span class="err" aria-live="polite"></span></div>
+<div class="field"><label for="v-address">ঠিকানা</label>
+<input id="v-address" name="address" autocomplete="street-address"><span class="err"></span></div>
+<div class="field"><label for="v-interest">আগ্রহের বিষয়</label>
+<textarea id="v-interest" name="interest" rows="2"></textarea><span class="err"></span></div>
+<div class="field"><label for="v-exp">অভিজ্ঞতা (যদি থাকে)</label>
+<textarea id="v-exp" name="experience" rows="3"></textarea><span class="err"></span></div>
+<div class="field"><label for="v-avail">সপ্তাহে কত সময় দিতে পারবেন</label>
+<input id="v-avail" name="availability"><span class="err"></span></div>
+<div class="field"><label for="v-msg">বার্তা</label>
+<textarea id="v-msg" name="message" rows="3"></textarea><span class="err"></span></div>
+<button type="submit" class="btn btn-primary">আবেদন জমা দিন</button>
+</form></div></section>
+</main>
+<footer id="site-footer"></footer>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

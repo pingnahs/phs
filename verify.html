@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head><meta charset="utf-8"><title>কাঠামো যাচাই</title></head>
+<body style="font-family:sans-serif;max-width:700px;margin:2rem auto">
+<h2>ফাইল কাঠামো যাচাই</h2>
+<ul id="out" style="line-height:1.9"></ul>
+<script>
+(function () {
+  var files = [
+    'assets/css/main.css', 'assets/css/portal.css', 'assets/css/admin.css',
+    'assets/js/api.js', 'assets/js/site.js', 'assets/js/member.js', 'assets/js/admin.js',
+    'index.html', 'about.html', 'mission.html', 'vision.html', 'services.html',
+    'activities.html', 'activity-details.html', 'projects.html', 'project.html',
+    'news.html', 'news-details.html', 'success-stories.html', 'success-story.html',
+    'gallery.html', 'volunteer.html', 'help.html', 'contact.html', '404.html',
+    'robots.txt', 'sitemap.xml',
+    'member/login.html', 'member/dashboard.html', 'member/chanda.html',
+    'member/payment.html', 'member/payments.html', 'member/profile.html',
+    'admin/login.html', 'admin/dashboard.html', 'admin/members.html', 'admin/payments.html',
+    'admin/chanda.html', 'admin/reports.html', 'admin/audit.html', 'admin/homepage.html',
+    'admin/statistics.html', 'admin/committee.html', 'admin/activities.html',
+    'admin/services.html', 'admin/projects.html', 'admin/news.html',
+    'admin/success-stories.html', 'admin/gallery.html', 'admin/volunteers.html',
+    'admin/help.html', 'admin/messages.html', 'admin/settings.html', 'admin/migration.html'
+  ];
+  var out = document.getElementById('out');
+  var missing = 0;
+  var todo = files.length;
+  files.forEach(function (f) {
+    fetch(f, { method: 'HEAD' })
+      .then(function (r) { report(f, r.ok ? '✅' : '⚠️ (মিলল কিন্তু স্ট্যাটাস ' + r.status + ')'); })
+      .catch(function () { report(f, '❌ পাওয়া যায়নি — নাম/পথ দেখুন'); });
+  });
+  function report(f, s) {
+    if (s.indexOf('❌') === 0) missing++;
+    var li = document.createElement('li');
+    li.textContent = s + ' ' + f;
+    out.appendChild(li);
+    if (--todo === 0) {
+      var h = document.createElement('h3');
+      h.textContent = missing === 0 ? '🎉 সব ফাইল ঠিক জায়গায় আছে!' :
+        ('❌ ' + missing + ' টি ফাইল পাওয়া যায়নি — উপরের ❌ লাইনগুলো দেখুন');
+      h.style.color = missing === 0 ? 'green' : 'red';
+      out.appendChild(h);
+    }
+  }
+})();
+</script>
+</body>
+</html>

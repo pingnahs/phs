@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সহায়তার আবেদন — পিংনা হিতৈষী সংঘ</title>
+<meta name="description" content="পিংনা হিতৈষী সংঘ থেকে সহায়তা চাইতে আবেদন করুন — শিক্ষা, চিকিৎসা, খাদ্য ও দুর্যোগ সহায়তা। আপনার তথ্য সম্পূর্ণ গোপনীয়।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body data-page="help">
+<a class="skip-link" href="#main">মূল কন্টেন্টে যান</a>
+<header id="site-header" class="site-header"></header>
+<main id="main">
+<div class="page-head"><div class="container"><h1>সহায়তার আবেদন</h1>
+<p class="muted">আপনার তথ্য গোপনীয় — শুধুমাত্র অনুমোদিত কর্তৃপক্ষ দেখবে</p></div></div>
+<section class="section"><div class="container">
+<form class="form-card" id="help-form" novalidate>
+<div class="form-alert form-alert-error" role="alert" tabindex="-1" hidden></div>
+<div class="field"><label class="req" for="h-name">আবেদনকারীর নাম</label>
+<input id="h-name" name="applicantName" autocomplete="name" required><span class="err" aria-live="polite"></span></div>
+<div class="field"><label class="req" for="h-phone">মোবাইল নম্বর</label>
+<input id="h-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required><span class="err" aria-live="polite"></span></div>
+<div class="grid grid-2">
+<div class="field"><label for="h-village">গ্রাম</label><input id="h-village" name="village"><span class="err"></span></div>
+<div class="field"><label for="h-union">ইউনিয়ন</label><input id="h-union" name="union"><span class="err"></span></div>
+<div class="field"><label for="h-upazila">উপজেলা</label><input id="h-upazila" name="upazila"><span class="err"></span></div>
+<div class="field"><label for="h-district">জেলা</label><input id="h-district" name="district"><span class="err"></span></div>
+<div class="field"><label for="h-family">পরিবারের সদস্য সংখ্যা</label>
+<input id="h-family" name="familyMembers" type="number" min="0" max="30" inputmode="numeric"><span class="err"></span></div>
+<div class="field"><label for="h-income">মাসিক আয় (টাকা)</label>
+<input id="h-income" name="monthlyIncome" type="number" min="0" inputmode="numeric"><span class="err"></span></div>
+</div>
+<div class="field"><label class="req" for="h-type">সহায়তার ধরন</label>
+<select id="h-type" name="assistanceType" required>
+<option value="">— নির্বাচন করুন —</option>
+<option>শিক্ষা সহায়তা</option><option>চিকিৎসা সহায়তা</option>
+<option>খাদ্য সহায়তা</option><option>শীতবস্ত্র সহায়তা</option>
+<option>দুর্যোগ সহায়তা</option><option>অন্যান্য</option>
+</select><span class="err" aria-live="polite"></span></div>
+<div class="field"><label class="req" for="h-desc">আপনার প্রয়োজনের বিবরণ</label>
+<textarea id="h-desc" name="description" rows="4" required></textarea><span class="err" aria-live="polite"></span></div>
+<div class="field">
+<label for="attachment">সংযুক্তি (প্রয়োজনে ছবি বা ডকুমেন্ট — JPG/PNG/WebP/PDF, সর্বোচ্চ ৫ MB)</label>
+<div class="file-row"><input id="attachment" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf">
+<span class="file-name" id="attachment-name"></span></div>
+<span class="hint">আপনার সংযুক্তি সুরক্ষিতভাবে সংরক্ষিত হবে।</span><span class="err"></span></div>
+<button type="submit" class="btn btn-primary">আবেদন জমা দিন</button>
+</form></div></section>
+</main>
+<footer id="site-footer"></footer>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

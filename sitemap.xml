@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DEPLOYMENT CONFIG: replace https://YOUR-ORIGIN with your real GitHub Pages URL -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url><loc>https://YOUR-ORIGIN/</loc></url>
+<url><loc>https://YOUR-ORIGIN/about.html</loc></url>
+<url><loc>https://YOUR-ORIGIN/mission.html</loc></url>
+<url><loc>https://YOUR-ORIGIN/vision.html</loc></url>
+<url><loc>https://YOUR-ORIGIN/services.html</loc></url>
+<url><loc>https://YOUR-ORIGIN/activities.html</loc></url>
+<url><loc>https://YOUR-ORIGIN/projects.html</loc></url>
+<url><loc>https://YOUR-ORIGIN/news.html</loc></url>
+<url><loc>https://YOUR-ORIGIN/success-stories.html</loc></url>
+<url><loc>https://YOUR-ORIGIN/gallery.html</loc></url>
+<url><loc>https://YOUR-ORIGIN/volunteer.html</loc></url>
+<url><loc>https://YOUR-ORIGIN/help.html</loc></url>
+<url><loc>https://YOUR-ORIGIN/contact.html</loc></url>
+</urlset>

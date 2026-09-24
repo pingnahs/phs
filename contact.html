@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>যোগাযোগ — পিংনা হিতৈষী সংঘ</title>
+<meta name="description" content="পিংনা হিতৈষী সংঘের সাথে যোগাযোগ করুন — ঠিকানা, ফোন, ইমেইল ও সরাসরি বার্তা পাঠানোর ফর্ম।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body data-page="contact">
+<a class="skip-link" href="#main">মূল কন্টেন্টে যান</a>
+<header id="site-header" class="site-header"></header>
+<main id="main">
+<div class="page-head"><div class="container"><h1>যোগাযোগ</h1></div></div>
+<section class="section"><div class="container">
+<div class="grid grid-2">
+<div id="contact-info"></div>
+<form class="form-card" id="contact-form" novalidate>
+<div class="form-alert form-alert-error" role="alert" tabindex="-1" hidden></div>
+<div class="field"><label class="req" for="c-name">নাম</label>
+<input id="c-name" name="name" autocomplete="name" required><span class="err" aria-live="polite"></span></div>
+<div class="field"><label for="c-phone">মোবাইল</label>
+<input id="c-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel"><span class="err" aria-live="polite"></span></div>
+<div class="field"><label for="c-email">ইমেইল</label>
+<input id="c-email" name="email" type="email" autocomplete="email"><span class="err" aria-live="polite"></span></div>
+<div class="field"><label for="c-subject">বিষয়</label>
+<input id="c-subject" name="subject"><span class="err"></span></div>
+<div class="field"><label class="req" for="c-msg">বার্তা</label>
+<textarea id="c-msg" name="message" rows="4" required></textarea><span class="err" aria-live="polite"></span></div>
+<button type="submit" class="btn btn-primary">পাঠিয়ে দিন</button>
+</form>
+</div></div></section>
+</main>
+<footer id="site-footer"></footer>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>
+
+ 

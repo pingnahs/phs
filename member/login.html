@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>সদস্য লগইন — পিংনা হিতৈষী সংঘ</title>
+<meta name="description" content="সদস্য লগইন — নিবন্ধিত ইমেইল ও পাসওয়ার্ড দিয়ে নিরাপদ প্রবেশ।">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body data-page="login">
+<a class="skip-link" href="#main">মূল কন্টেন্টে যান</a>
+<header id="site-header" class="site-header"></header>
+<main id="main">
+<section class="section"><div class="container">
+<div class="form-card">
+
+<div id="view-login">
+<h1>সদস্য লগইন</h1>
+<p class="muted small">আপনার প্রোফাইলে সংরক্ষিত ইমেইল ও পাসওয়ার্ড দিয়ে প্রবেশ করুন।</p>
+<form id="login-form" novalidate>
+<div class="form-alert form-alert-error" role="alert" tabindex="-1" hidden></div>
+<div class="field"><label class="req" for="login-email">ইমেইল ঠিকানা</label>
+<input id="login-email" type="email" autocomplete="username" required>
+<span class="err" aria-live="polite"></span></div>
+<div class="field"><label class="req" for="login-pass">পাসওয়ার্ড</label>
+<input id="login-pass" type="password" autocomplete="current-password" required>
+<span class="err" aria-live="polite"></span></div>
+<button type="submit" class="btn btn-primary">লগইন করুন</button>
+<p class="small mt"><a href="#" id="go-reset">পাসওয়ার্ড ভুলে গেছেন? / প্রথমবার লগইন করছেন?</a></p>
+</form>
+</div>
+
+<div id="view-reset" hidden>
+<h1>পাসওয়ার্ড সেট/রিসেট করুন</h1>
+<p class="muted small">আপনার নিবন্ধিত ইমেইলে একটি নিরাপত্তা কোড পাঠানো হবে, যা দিয়ে আপনি নতুন পাসওয়ার্ড সেট করতে পারবেন।</p>
+
+<div id="reset-step1">
+<form id="reset-request-form" novalidate>
+<div class="form-alert form-alert-error" role="alert" tabindex="-1" hidden></div>
+<div class="field"><label class="req" for="reset-email">ইমেইল ঠিকানা</label>
+<input id="reset-email" type="email" autocomplete="email" required>
+<span class="err" aria-live="polite"></span></div>
+<button type="submit" class="btn btn-primary">কোড পাঠান</button>
+</form>
+</div>
+
+<div id="reset-step2" hidden>
+<p>কোড পাঠানো হয়েছে: <b id="reset-email-label"></b></p>
+<form id="reset-confirm-form" novalidate>
+<div class="form-alert form-alert-error" role="alert" tabindex="-1" hidden></div>
+<div class="field"><label class="req" for="reset-code">৬ ডিজিটের কোড</label>
+<input id="reset-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required>
+<span class="err" aria-live="polite"></span></div>
+<div class="field"><label class="req" for="reset-newpass">নতুন পাসওয়ার্ড</label>
+<input id="reset-newpass" type="password" autocomplete="new-password" required>
+<span class="err" aria-live="polite"></span>
+<span class="muted small">কমপক্ষে ১০ অক্ষর, অক্ষর ও সংখ্যা উভয়ই থাকতে হবে।</span></div>
+<div class="field"><label class="req" for="reset-newpass2">নতুন পাসওয়ার্ড আবার লিখুন</label>
+<input id="reset-newpass2" type="password" autocomplete="new-password" required>
+<span class="err" aria-live="polite"></span></div>
+<button type="submit" class="btn btn-primary">পাসওয়ার্ড সেট করে লগইন করুন</button>
+<p class="small mt">কোড পাননি? <a href="#" id="reset-resend">আবার পাঠান</a></p>
+</form>
+</div>
+
+<p class="small mt"><a href="#" id="go-login">← লগইনে ফিরে যান</a></p>
+</div>
+
+<p class="small mt"><a href="../index.html">← হোমপেজে ফিরুন</a></p>
+</div>
+</div></section>
+</main>
+<footer id="site-footer"></footer>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/site.js"></script>
+</body>
+</html>
