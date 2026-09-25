@@ -3,4 +3,4 @@ Allow: /
 Disallow: /member/
 Disallow: /admin/
 
-Sitemap: https://pingnahs.github.io/phs/sitemap.xml
+Sitemap: https://engr-rabbi.github.io/phs/sitemap.xml

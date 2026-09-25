@@ -282,6 +282,19 @@ body:not([data-page^="m-"]):not([data-page="dashboard"]):not([data-page="migrati
 .stat .l{color:var(--muted);font-size:.88rem}
 .icon-glyph{font-size:2.1rem;line-height:1;display:block;margin-bottom:.5rem}
 
+/* Clickable variant of .stat (e.g. "মোট অনুদান" → Donation Details) — same
+   card, but with a pointer affordance and a small "opens details" hint. */
+.stat-clickable{cursor:pointer;transition:transform var(--t-fast),box-shadow var(--t-fast),
+  border-color var(--t-fast);text-align:center;width:100%;font:inherit;color:inherit;
+  border:1px solid var(--line)}
+.stat-clickable:hover,.stat-clickable:focus-visible{transform:translateY(-2px);
+  box-shadow:var(--shadow-md);border-color:var(--marigold)}
+.stat-clickable:focus-visible{outline:2px solid var(--marigold);outline-offset:2px}
+.stat-clickable .l{display:flex;align-items:center;justify-content:center;gap:.3rem}
+.stat-clickable .l::after{content:"↗";font-size:.8em;color:var(--marigold-deep);
+  transition:transform var(--t-fast)}
+.stat-clickable:hover .l::after{transform:translate(2px,-2px)}
+
 /* Impact-stats band — dark strip, big serif marigold numerals, count-up via JS */
 .stat-band{background:var(--green-dark);color:#fff;border-radius:20px;
   padding:1.8rem 1.4rem;box-shadow:var(--shadow-lg)}

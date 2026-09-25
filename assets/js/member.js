@@ -10,6 +10,111 @@
     return e;
   }
 
+  /** §Donation Details — same accessible modal pattern already proven in
+   *  admin.js (role=dialog, Escape/backdrop-click close, focus management),
+   *  reused here so the member portal gets an identical, consistent modal. */
+  function modal(title, bodyHtml, opts) {
+    opts = opts || {};
+    var root = el('div', 'modal-root');
+    root.innerHTML = '<div class="modal-backdrop"></div>' +
+      '<div class="modal' + (opts.wide ? ' modal-wide' : '') +
+      '" role="dialog" aria-modal="true" aria-label="' + PHS.esc(title) + '">' +
+      '<div class="modal-head"><h2>' + PHS.esc(title) + '</h2>' +
+      '<button type="button" class="modal-x" aria-label="বন্ধ করুন">✕</button></div>' +
+      '<div class="modal-body"></div></div>';
+    root.querySelector('.modal-body').innerHTML = bodyHtml;
+    document.body.appendChild(root);
+    var close = function () {
+      document.removeEventListener('keydown', onKey);
+      root.remove();
+    };
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    document.addEventListener('keydown', onKey);
+    root.querySelector('.modal-x').addEventListener('click', close);
+    root.querySelector('.modal-backdrop').addEventListener('click', close);
+    var f = root.querySelector('.modal-body button,.modal-body [href]');
+    if (f) f.focus();
+    return { root: root, body: root.querySelector('.modal-body'), close: close };
+  }
+
+  var DONOR_LABEL = { MEMBER: 'সদস্য', NON_MEMBER: 'সদস্য নন', ORGANIZATION: 'প্রতিষ্ঠান', OTHER: 'অন্যান্য' };
+
+  /** §Donation Details — opened by clicking the "মোট অনুদান" card, wherever
+   *  it appears (dashboard's org financial overview, or the full finance
+   *  page's summary). Calls the SAME getDonations route (member access,
+   *  already forces status=ACTIVE) that the aggregate totalDonation figure
+   *  is computed from — so the number shown here can never drift from the
+   *  card that opened it; both are the same server-side ACTIVE-only sum. */
+  function openDonationDetailsModal() {
+    var m = modal('অনুদানের বিস্তারিত তথ্য', '<p class="loading">লোড হচ্ছে…</p>', { wide: true });
+    var state = { page: 1, totalPages: 1, items: [] };
+
+    function draw(totalActiveAmount) {
+      m.body.innerHTML = '';
+      var band = el('div', 'sum-band');
+      band.innerHTML = '<span>মোট (সক্রিয়) অনুদান: <b>' + PHS.bdt(totalActiveAmount) + '</b></span>';
+      m.body.appendChild(band);
+      if (!state.items.length) {
+        m.body.appendChild(el('p', 'loading', 'কোনো অনুদানের তথ্য পাওয়া যায়নি।'));
+        return;
+      }
+      state.items.forEach(function (d) {
+        var lbl = DONOR_LABEL[d.donorType] || d.donorType || '—';
+        var row = el('div', 'fin-row is-donation');
+        row.innerHTML =
+          '<div class="fin-top"><span class="fin-purpose">' + PHS.esc(d.purpose || lbl) + '</span>' +
+          '<span class="fin-amt">' + PHS.esc(PHS.bdt(d.amount)) + '</span></div>' +
+          '<div class="fin-meta">' + PHS.esc(PHS.dateLabel(d.date)) + ' · ' + PHS.esc(lbl) +
+          (d.donorName ? ' · ' + PHS.esc(d.donorName) : '') +
+          (d.paymentMethod ? ' · ' + PHS.esc(d.paymentMethod) : '') + '</div>' +
+          (d.description ? '<div class="fin-meta">' + PHS.esc(d.description) + '</div>' : '');
+        m.body.appendChild(row);
+      });
+      if (state.page < state.totalPages) {
+        var more = el('button', 'btn btn-outline load-more', 'আরও দেখুন');
+        more.type = 'button';
+        more.addEventListener('click', function () { state.page++; load(false); });
+        m.body.appendChild(more);
+      }
+    }
+
+    function load(reset) {
+      if (reset) { state.page = 1; state.items = []; }
+      apiM('getDonations', { page: state.page, pageSize: 20 }).then(function (r) {
+        state.items = state.items.concat(r.data.items);
+        state.totalPages = r.data.totalPages;
+        draw(r.data.totalActiveAmount);
+      }).catch(function (e) {
+        if (e.handled) return;
+        m.body.innerHTML = '';
+        m.body.appendChild(el('p', 'load-error', e.message || 'কিছু একটা সমস্যা হয়েছে।'));
+      });
+    }
+    load(true);
+  }
+
+  /** Marks a rendered "মোট অনুদান" stat card clickable and wires it to the
+   *  modal above. `cards` is the .stat-grid-3/.cards container element that
+   *  was just filled via the [icon,label,value] map-join pattern used
+   *  throughout this file — found by matching the exact label text so this
+   *  never accidentally binds to a different card. */
+  function makeDonationCardClickable(cardsContainer) {
+    var nodes = cardsContainer.querySelectorAll('.stat');
+    for (var i = 0; i < nodes.length; i++) {
+      var lbl = nodes[i].querySelector('.l');
+      if (lbl && lbl.textContent.indexOf('মোট অনুদান') !== -1) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = nodes[i].className + ' stat-clickable';
+        btn.innerHTML = nodes[i].innerHTML;
+        btn.setAttribute('aria-haspopup', 'dialog');
+        btn.addEventListener('click', openDonationDetailsModal);
+        nodes[i].replaceWith(btn);
+        return;
+      }
+    }
+  }
+
   var ORG = 'পিংনা হিতৈষী সংঘ';
 
   var STATUS = {
@@ -233,6 +338,7 @@
                 '<div class="v">' + c[2] + '</div><div class="l">' + c[1] + '</div></div>';
             }).join('');
             finBox.appendChild(g);
+            makeDonationCardClickable(g);
             // §Advance Chanda fix: "মোট চাঁদা আয়" above is now the true total
             // (current + advance, from Chanda.gs's grandTotalPaidAmount) —
             // this line breaks it down so it's clear at a glance, without
@@ -703,6 +809,7 @@
                 '<div class="v">' + c[2] + '</div><div class="l">' + c[1] + '</div></div>';
             }).join('');
             sumBox.appendChild(g);
+            makeDonationCardClickable(g);
             if (f.totalAdvanceChada > 0) {
               var chandaBreak2 = el('div', 'sum-band');
               chandaBreak2.innerHTML =
@@ -766,10 +873,9 @@
       $('#fx-dt').addEventListener('change', function () { expState.dateTo = this.value; drawExp(true); });
       drawExp(true);
 
-      // ---- Donation: aggregate + recent list (member-donor identity masked
-      // server-side — this member never sees who else donated, §8) ----
+      // ---- Donation: aggregate + full ACTIVE list, donor recognition
+      // shown for every donor type (§8) ----
       var donState = { page: 1, totalPages: 1, items: [] };
-      var DONOR_LABEL = { MEMBER: 'সদস্য', NON_MEMBER: 'সদস্য নন', ORGANIZATION: 'প্রতিষ্ঠান', OTHER: 'অন্যান্য' };
       function drawDon(reset) {
         if (reset) { donState.page = 1; donState.items = []; donBox.innerHTML = '<p class="loading">লোড হচ্ছে…</p>'; }
         apiM('getDonations', { page: donState.page, pageSize: 10 }).then(function (r) {
@@ -798,7 +904,9 @@
             '<div class="fin-top"><span class="fin-purpose">' + PHS.esc(d.purpose || lbl) + '</span>' +
             '<span class="fin-amt">' + PHS.esc(PHS.bdt(d.amount)) + '</span></div>' +
             '<div class="fin-meta">' + PHS.esc(PHS.dateLabel(d.date)) + ' · ' + PHS.esc(lbl) +
-            (d.donorType !== 'MEMBER' && d.donorName ? ' · ' + PHS.esc(d.donorName) : '') + '</div>';
+            (d.donorName ? ' · ' + PHS.esc(d.donorName) : '') +
+            (d.paymentMethod ? ' · ' + PHS.esc(d.paymentMethod) : '') + '</div>' +
+            (d.description ? '<div class="fin-meta">' + PHS.esc(d.description) + '</div>' : '');
           donBox.appendChild(row);
         });
         if (donState.page < donState.totalPages) {

@@ -118,6 +118,23 @@
 .fin-row.is-donation .fin-amt{color:#7a5c00}
 .fin-row .fin-meta{color:var(--muted);font-size:.83rem;margin-top:.25rem;word-break:break-word}
 .load-more{width:100%;margin-top:.4rem}
+
+/* ---- modal (mirrors admin.css exactly, for the Donation Details view) ---- */
+.modal-root{position:fixed;inset:0;z-index:500}
+.modal-backdrop{position:absolute;inset:0;background:rgba(8,20,13,.6);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.modal{position:relative;margin:4vh auto;width:min(94vw,560px);max-height:90vh;display:flex;
+  flex-direction:column;background:#fff;border-radius:var(--radius-lg);
+  box-shadow:0 24px 64px rgba(6,20,13,.35)}
+.modal-wide{width:min(96vw,860px)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 1.2rem;border-bottom:1px solid var(--line)}
+.modal-head h2{margin:0;font-size:1.1rem;padding:0}
+.modal-head h2::after{display:none}
+.modal-x{background:var(--bg);border:0;font-size:1.05rem;cursor:pointer;padding:.45rem .65rem;
+  border-radius:10px;transition:background var(--t-fast)}
+.modal-x:hover{background:var(--danger-soft);color:var(--danger)}
+.modal-body{padding:1.2rem;overflow:auto}
 .fin-chart{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
   padding:1rem 1.1rem 1.3rem;box-shadow:var(--shadow-xs)}
 .fin-chart-bars{display:flex;align-items:flex-end;gap:.5rem;height:170px;

@@ -14,27 +14,6 @@
   function esc(s) { return PHS.esc(s); }
   function dt(s) { var x = String(s || '').slice(0, 16).replace('T', ' '); return x || '—'; }
 
-  /** §Donation Details: turns the rendered "মোট অনুদান" stat card into a
-   *  button, found by its label text so this never mis-binds to a
-   *  different card. `onClick` differs by page — finance.html switches to
-   *  its own Donation tab; dashboard.html navigates there. */
-  function makeDonationCardClickable(cardsContainer, onClick) {
-    var nodes = cardsContainer.querySelectorAll('.stat');
-    for (var i = 0; i < nodes.length; i++) {
-      var lbl = nodes[i].querySelector('.l');
-      if (lbl && lbl.textContent.indexOf('মোট অনুদান') !== -1) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = nodes[i].className + ' stat-clickable';
-        btn.innerHTML = nodes[i].innerHTML;
-        btn.setAttribute('aria-haspopup', 'true');
-        btn.addEventListener('click', onClick);
-        nodes[i].replaceWith(btn);
-        return;
-      }
-    }
-  }
-
   // ------------------------------------------------------------ session
 
   function getSess() {
@@ -153,7 +132,6 @@
         '" placeholder="File ID বা URL (ঐচ্ছিক — আপলোড করলে স্বয়ংক্রিয় ভরবে)">' +
         '<div class="file-row"><input type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-upload="' +
         f.purpose + '"><span class="file-name"></span></div>' +
-        '<div class="img-preview">' + (v ? PHS.imgHtml(v, '', 'img-preview-thumb', 200) : '') + '</div>' +
         '<span class="err" aria-live="polite"></span></div>';
     }
     return '<div class="field"><label' + (f.req ? ' class="req"' : '') + ' for="' + id + '">' +
@@ -194,8 +172,6 @@
         }).then(function (r) {
           var holder = inp.closest('.field').querySelector('input[type="text"]');
           if (holder) holder.value = r.data.fileId;
-          var preview = inp.closest('.field').querySelector('.img-preview');
-          if (preview) preview.innerHTML = PHS.imgHtml(r.data.fileId, '', 'img-preview-thumb', 200);
           nameEl.textContent = f.name + ' ✓';
           PHS.toast('ছবি আপলোড হয়েছে।');
         }).catch(function (err) {
@@ -267,28 +243,6 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 800);
     PHS.toast(PHS.bnNumber(res.data.rowCount) + ' সারি ডাউনলোড হয়েছে।');
   }
-  /** §Finance/§10: dependency-free income-vs-expenditure bar chart. rows:
-   *  [{label, income, expenditure}], oldest→newest. No chart library used —
-   *  keeps the product's zero-dependency footprint and works offline. */
-  function finChart(host, rows) {
-    if (!rows || !rows.length) { host.innerHTML = '<p class="loading">চার্টের জন্য যথেষ্ট তথ্য নেই।</p>'; return; }
-    var max = 1;
-    rows.forEach(function (r) { max = Math.max(max, r.income || 0, r.expenditure || 0); });
-    var cols = rows.map(function (r) {
-      var hi = Math.max(Math.round(((r.income || 0) / max) * 100), (r.income > 0 ? 2 : 0));
-      var he = Math.max(Math.round(((r.expenditure || 0) / max) * 100), (r.expenditure > 0 ? 2 : 0));
-      var shortLbl = String(r.label || '').split(' ')[0].slice(0, 3);
-      return '<div class="fin-chart-col" title="' + esc(r.label) + ' — আয় ' + PHS.bdt(r.income) +
-        ', ব্যয় ' + PHS.bdt(r.expenditure) + '">' +
-        '<div class="fin-chart-bar-pair">' +
-        '<div class="fin-bar fin-bar-income" style="height:' + hi + '%"></div>' +
-        '<div class="fin-bar fin-bar-exp" style="height:' + he + '%"></div>' +
-        '</div><div class="fin-chart-label">' + esc(shortLbl) + '</div></div>';
-    }).join('');
-    host.innerHTML = '<div class="fin-chart"><div class="fin-chart-bars">' + cols + '</div>' +
-      '<div class="fin-chart-legend"><span><i class="fin-dot fin-dot-income"></i>আয়</span>' +
-      '<span><i class="fin-dot fin-dot-exp"></i>ব্যয়</span></div></div>';
-  }
 
   // ------------------------------------------------------------ shell + nav
 
@@ -298,7 +252,6 @@
       ['members.html', '👥', 'সদস্য', 'members'],
       ['payments.html', '🧾', 'পেমেন্ট যাচাই', 'payments'],
       ['chanda.html', '💰', 'চাঁদা', 'chanda'],
-      ['finance.html', '💵', 'আর্থিক ব্যবস্থাপনা', 'finance'],
       ['reports.html', '📈', 'রিপোর্ট', 'reports']] },
     { g: 'কনটেন্ট', items: [
       ['activities.html', '🏃', 'কার্যক্রম', 'content:activities'],
@@ -387,7 +340,6 @@
             ['🗓️', 'এই মাসে অনুমোদিত', PHS.bnNumber(s.approvedPaymentsThisMonth)],
             ['💰', 'মোট প্রত্যাশিত চাঁদা', PHS.bdt(s.totalExpectedChanda)],
             ['🟢', 'মোট অনুমোদিত চাঁদা', PHS.bdt(s.totalApprovedChanda)],
-            ['📅', 'অগ্রিম চাঁদা (অনুমোদিত)', PHS.bdt(s.totalAdvanceChanda)],
             ['⏳', 'মোট বকেয়া চাঁদা', PHS.bdt(s.totalOutstandingChanda)]
           ];
           var g = el('div', 'cards');
@@ -403,33 +355,6 @@
             var a = el('a', 'btn btn-outline', q[1]); a.href = q[0]; quick.appendChild(a);
           });
           root.appendChild(quick);
-          // §9/§Finance: finance snapshot appended below the existing dashboard —
-          // purely additive, and failure here never breaks the dashboard above.
-          var finBox = el('div', 'mt');
-          root.appendChild(finBox);
-          loadInto(finBox, function () {
-            return apiA('getFinancialSummaryAdmin').then(function (fr) {
-              var f = fr.data;
-              finBox.innerHTML = '';
-              finBox.appendChild(el('h3', '', 'আর্থিক সারসংক্ষেপ'));
-              var balCls = f.currentBalance >= 0 ? 'stat-balance-pos' : 'stat-balance-neg';
-              var fg = el('div', 'cards');
-              fg.innerHTML = [
-                ['📈', 'মোট আয়', PHS.bdt(f.totalIncome), ''],
-                ['📉', 'মোট ব্যয়', PHS.bdt(f.totalExpenditure), ''],
-                ['🏦', 'বর্তমান স্থিতি', PHS.bdt(f.currentBalance), balCls],
-                ['🎁', 'মোট অনুদান', PHS.bdt(f.totalDonation), '']
-              ].map(function (c) {
-                return '<div class="stat ' + c[3] + '"><div class="ic">' + c[0] + '</div>' +
-                  '<div class="v">' + c[2] + '</div><div class="l">' + c[1] + '</div></div>';
-              }).join('');
-              finBox.appendChild(fg);
-              makeDonationCardClickable(fg, function () { location.href = 'finance.html?tab=donation'; });
-              var link = el('a', 'btn btn-outline', '💵 সম্পূর্ণ আর্থিক ব্যবস্থাপনা');
-              link.href = 'finance.html';
-              finBox.appendChild(link);
-            });
-          });
         });
       });
     },
@@ -451,11 +376,6 @@
           return apiA('getMembers', { search: state.search, status: state.status,
             page: state.page, pageSize: 12 }).then(function (r) {
             table(list, [
-              { k: 'photo', label: '', fmt: function (m) {
-                  return '<div class="avatar mini-avatar">' +
-                    (m.profilePhotoFileId ? PHS.imgHtml(m.profilePhotoFileId, '', '', 80) :
-                      esc((m.nameBn || m.nameEn || m.memberCode || 'স').trim().charAt(0))) +
-                    '</div>'; } },
               { k: 'memberCode', label: 'কোড' },
               { k: 'name', label: 'নাম', fmt: function (m) {
                   return esc(m.nameBn || m.nameEn || '—'); } },
@@ -499,20 +419,6 @@
             '<div><h3 style="margin:0">' + esc(m.nameBn || m.nameEn) + '</h3>' +
             '<div class="code">কোড: ' + esc(m.memberCode) + ' ' + badge(m.status) + '</div></div>';
           box.appendChild(head);
-          // §Image fix: render the actual photo via PHS.imgUrl (correct
-          // thumbnail format) instead of always leaving initials showing.
-          if (m.profilePhotoFileId) {
-            var mPhotoUrl = PHS.imgUrl(m.profilePhotoFileId, 200);
-            if (mPhotoUrl) {
-              var mImg = new Image();
-              mImg.alt = 'প্রোফাইল ছবি';
-              mImg.onload = function () {
-                var av = box.querySelector('#mav');
-                if (av) { av.textContent = ''; av.appendChild(mImg); }
-              };
-              mImg.src = mPhotoUrl;
-            }
-          }
           var photoBtn = el('div', 'file-row mt');
           photoBtn.innerHTML = '<input type="file" accept="image/*" id="mphoto">' +
             '<span class="file-name">প্রোফাইল ছবি আপলোড</span>';
@@ -556,8 +462,6 @@
               ['যাচাই চলছে', PHS.bnNumber(c.pendingMonths)],
               ['আংশিক', PHS.bnNumber(c.partialMonths)],
               ['মোট বকেয়া', PHS.bdt(c.totalOutstandingAmount)],
-              ['মোট পরিশোধিত চাঁদা', PHS.bdt(c.grandTotalPaidAmount)],
-              ['অগ্রিম চাঁদা', PHS.bdt(c.totalAdvancePaidAmount)],
               ['পরিশোধিত ধারাবাহিকভাবে', c.paidThroughMonth ? PHS.monthLabel(c.paidThroughMonth) : '—']
             ].map(function (s) {
               return '<div class="stat"><div class="v">' + s[1] + '</div><div class="l">' + s[0] + '</div></div>';
@@ -967,471 +871,6 @@
       tab(1); drawMonthly();
     },
 
-    // ---------------- finance (Expenditure + Donation + unified summary) ----------------
-    finance: function (root) {
-      root.innerHTML =
-        '<div class="tabs" role="tablist">' +
-        '<button type="button" class="chip" id="f-t1" aria-pressed="true">সারসংক্ষেপ</button>' +
-        '<button type="button" class="chip" id="f-t2" aria-pressed="false">ব্যয় (Expenditure)</button>' +
-        '<button type="button" class="chip" id="f-t3" aria-pressed="false">অনুদান (Donation)</button></div>' +
-        '<div id="f-tab-sum"></div><div id="f-tab-exp" hidden></div><div id="f-tab-don" hidden></div>';
-      var sum = $('#f-tab-sum'), expT = $('#f-tab-exp'), donT = $('#f-tab-don');
-      function ftab(which, opts) {
-        opts = opts || {};
-        $('#f-t1').setAttribute('aria-pressed', which === 1 ? 'true' : 'false');
-        $('#f-t2').setAttribute('aria-pressed', which === 2 ? 'true' : 'false');
-        $('#f-t3').setAttribute('aria-pressed', which === 3 ? 'true' : 'false');
-        sum.hidden = which !== 1; expT.hidden = which !== 2; donT.hidden = which !== 3;
-        if (which === 1 && !sum.dataset.loaded) { sum.dataset.loaded = '1'; drawSummary(); }
-        if (which === 2 && !expT.dataset.loaded) { expT.dataset.loaded = '1'; initExpenditureTab(); }
-        // §Donation Details: an explicit status (from the "মোট অনুদান" card,
-        // or a ?tab=donation link) always forces a fresh init with that
-        // filter, even if the tab was already opened earlier with its own
-        // PENDING-moderation default — a plain tab-button click still only
-        // initializes once, exactly as before.
-        if (which === 3 && (opts.status || !donT.dataset.loaded)) {
-          donT.dataset.loaded = '1'; initDonationTab(opts.status);
-        }
-      }
-      $('#f-t1').addEventListener('click', function () { ftab(1); });
-      $('#f-t2').addEventListener('click', function () { ftab(2); });
-      $('#f-t3').addEventListener('click', function () { ftab(3); });
-
-      var EXP_METHODS = [{ v: 'CASH', l: 'নগদ (Cash)' }, { v: 'BANK', l: 'ব্যাংক (Bank)' },
-        { v: 'MOBILE_BANKING', l: 'মোবাইল ব্যাংকিং' }, { v: 'OTHER', l: 'অন্যান্য' }];
-      var DON_METHODS = [{ v: 'CASH', l: 'নগদ (Cash)' }, { v: 'BANK', l: 'ব্যাংক (Bank)' },
-        { v: 'BKASH', l: 'বিকাশ (bKash)' }, { v: 'NAGAD', l: 'নগদ অ্যাপ (Nagad)' }, { v: 'OTHER', l: 'অন্যান্য' }];
-      var DONOR_TYPES = [{ v: 'MEMBER', l: 'সদস্য' }, { v: 'NON_MEMBER', l: 'সদস্য নন' },
-        { v: 'ORGANIZATION', l: 'প্রতিষ্ঠান' }, { v: 'OTHER', l: 'অন্যান্য' }];
-      function donorTypeLabel(v) {
-        var m = DONOR_TYPES.filter(function (x) { return x.v === v; })[0];
-        return m ? m.l : (v || '—');
-      }
-
-      // ---------- Summary tab ----------
-      function drawSummary() {
-        loadInto(sum, function () {
-          return Promise.all([apiA('getFinancialSummaryAdmin'), apiA('getFinancialTrendsAdmin', { months: 12 })])
-            .then(function (rs) {
-              var s = rs[0].data, months = rs[1].data.months;
-              sum.innerHTML = '';
-              if (s.chandaExceptions && s.chandaExceptions.length) {
-                var w = el('div', 'warn-box');
-                w.innerHTML = '<b>চাঁদা ইঞ্জিন সতর্কতা:</b> ' + PHS.bnNumber(s.chandaExceptions.length) +
-                  ' জন সদস্যের হিসাব সম্ভব হয়নি। "চাঁদা" পেজ থেকে সংশোধন করুন।';
-                sum.appendChild(w);
-              }
-              var balCls = s.currentBalance >= 0 ? 'stat-balance-pos' : 'stat-balance-neg';
-              var g = el('div', 'cards');
-              g.innerHTML = [
-                ['💰', 'মোট চাঁদা আয়', PHS.bdt(s.totalChada), ''],
-                ['🎁', 'মোট অনুদান', PHS.bdt(s.totalDonation), ''],
-                ['➕', 'অন্যান্য আয়', PHS.bdt(s.otherIncome), ''],
-                ['📈', 'মোট আয়', PHS.bdt(s.totalIncome), ''],
-                ['📉', 'মোট ব্যয়', PHS.bdt(s.totalExpenditure), ''],
-                ['🏦', 'বর্তমান স্থিতি', PHS.bdt(s.currentBalance), balCls]
-              ].map(function (c) {
-                return '<div class="stat ' + c[3] + '"><div class="ic">' + c[0] + '</div>' +
-                  '<div class="v">' + c[2] + '</div><div class="l">' + c[1] + '</div></div>';
-              }).join('');
-              sum.appendChild(g);
-              makeDonationCardClickable(g, function () { ftab(3, { status: 'ACTIVE' }); });
-              var sub = el('div', 'sum-band');
-              sub.innerHTML = '<span>সদস্য অনুদান: <b>' + PHS.bdt(s.totalMemberDonation) + '</b></span>' +
-                '<span>বহিরাগত/প্রাতিষ্ঠানিক অনুদান: <b>' + PHS.bdt(s.totalNonMemberDonation) + '</b></span>';
-              sum.appendChild(sub);
-              // §Advance Chanda fix: "মোট চাঁদা আয়" above is now the true
-              // total (current + advance, via Chanda.gs grandTotalPaidAmount)
-              // — this breaks it down, mirroring the donation sub-band.
-              if (s.totalAdvanceChada > 0) {
-                var chandaSub = el('div', 'sum-band');
-                chandaSub.innerHTML = '<span>চলতি মাস পর্যন্ত চাঁদা: <b>' + PHS.bdt(s.totalChadaThroughCurrentMonth) + '</b></span>' +
-                  '<span>অগ্রিম চাঁদা: <b>' + PHS.bdt(s.totalAdvanceChada) + '</b></span>';
-                sum.appendChild(chandaSub);
-              }
-              sum.appendChild(el('h3', '', 'মাসিক আয় বনাম ব্যয় (গত ১২ মাস)'));
-              var chartHost = el('div');
-              sum.appendChild(chartHost);
-              finChart(chartHost, months);
-              sum.appendChild(el('h3', 'mt', 'সাম্প্রতিক ব্যয়'));
-              var reBox = el('div'); sum.appendChild(reBox);
-              table(reBox, [
-                { k: 'date', label: 'তারিখ', fmt: function (r) { return esc(PHS.dateLabel(r.date)); } },
-                { k: 'purpose', label: 'উদ্দেশ্য' },
-                { k: 'category', label: 'ক্যাটাগরি' },
-                { k: 'amount', label: 'পরিমাণ', num: true, fmt: function (r) { return PHS.bdt(r.amount); } }
-              ], s.recentExpenditure, 'কোনো সাম্প্রতিক ব্যয় নেই।');
-              sum.appendChild(el('h3', 'mt', 'সাম্প্রতিক অনুদান'));
-              var rdBox = el('div'); sum.appendChild(rdBox);
-              table(rdBox, [
-                { k: 'date', label: 'তারিখ', fmt: function (r) { return esc(PHS.dateLabel(r.date)); } },
-                { k: 'donorType', label: 'দাতার ধরন', fmt: function (r) { return esc(donorTypeLabel(r.donorType)); } },
-                { k: 'donorName', label: 'দাতা' },
-                { k: 'amount', label: 'পরিমাণ', num: true, fmt: function (r) { return PHS.bdt(r.amount); } }
-              ], s.recentDonation, 'কোনো সাম্প্রতিক অনুদান নেই।');
-            });
-        });
-      }
-
-      // ---------- Expenditure tab ----------
-      function initExpenditureTab() {
-        var state = { search: '', category: '', status: 'ACTIVE', dateFrom: '', dateTo: '', page: 1 };
-        expT.innerHTML =
-          '<div class="toolbar">' +
-          '<div class="field"><label for="e-q">খুঁজুন</label><input id="e-q"></div>' +
-          '<div class="field"><label for="e-cat">ক্যাটাগরি</label><input id="e-cat" placeholder="যেমন Medical Camp"></div>' +
-          '<div class="field"><label for="e-st">অবস্থা</label><select id="e-st">' +
-          '<option value="ACTIVE" selected>সক্রিয়</option><option value="CANCELLED">বাতিল</option>' +
-          '<option value="">সব</option></select></div>' +
-          '<div class="field"><label for="e-df">তারিখ (থেকে)</label><input id="e-df" type="date"></div>' +
-          '<div class="field"><label for="e-dt">তারিখ (পর্যন্ত)</label><input id="e-dt" type="date"></div>' +
-          '<button type="button" class="btn btn-outline" id="e-ref">রিফ্রেশ</button>' +
-          '<button type="button" class="btn btn-primary" id="e-add">+ নতুন ব্যয়</button></div>' +
-          '<div id="e-total" class="sum-band"></div>' +
-          '<div id="e-list"></div><div id="e-pager"></div>';
-
-        function draw() {
-          loadInto($('#e-list'), function () {
-            return apiA('getExpendituresAdmin', {
-              search: state.search, category: state.category, status: state.status,
-              dateFrom: state.dateFrom, dateTo: state.dateTo, page: state.page, pageSize: 15
-            }).then(function (r) {
-              $('#e-total').innerHTML = '<span>মোট সক্রিয় ব্যয়: <b>' + PHS.bdt(r.data.totalActiveAmount) + '</b></span>';
-              table($('#e-list'), [
-                { k: 'date', label: 'তারিখ', fmt: function (x) { return esc(PHS.dateLabel(x.date)); } },
-                { k: 'purpose', label: 'উদ্দেশ্য' },
-                { k: 'category', label: 'ক্যাটাগরি' },
-                { k: 'amount', label: 'পরিমাণ', num: true, fmt: function (x) { return PHS.bdt(x.amount); } },
-                { k: 'paymentMethod', label: 'মাধ্যম' },
-                { k: 'referenceNumber', label: 'রেফারেন্স', fmt: function (x) {
-                    return x.referenceNumber ? '<span class="mono">' + esc(x.referenceNumber) + '</span>' : '—'; } },
-                { k: 'status', label: 'অবস্থা', fmt: function (x) { return badge(x.status); } },
-                { k: 'act', label: 'অ্যাকশন', fmt: function (x) {
-                    var h = '<div class="actions"><button type="button" class="btn btn-outline mini" data-e="' +
-                      esc(x.expenditureId) + '">এডিট</button>';
-                    if (x.status === 'ACTIVE') {
-                      h += '<button type="button" class="btn mini" data-c="' + esc(x.expenditureId) +
-                        '" style="background:var(--danger);color:#fff">বাতিল</button>';
-                    }
-                    return h + '</div>'; } }
-              ], r.data.items, 'কোনো ব্যয় পাওয়া যায়নি।');
-              pager($('#e-pager'), r.data.page, r.data.totalPages, function (p) { state.page = p; draw(); });
-              $('#e-list').querySelectorAll('[data-e]').forEach(function (b) {
-                b.addEventListener('click', function () {
-                  var it = r.data.items.filter(function (x) { return x.expenditureId === b.getAttribute('data-e'); })[0];
-                  openExpenditureForm(it);
-                });
-              });
-              $('#e-list').querySelectorAll('[data-c]').forEach(function (b) {
-                b.addEventListener('click', function () {
-                  var id = b.getAttribute('data-c');
-                  confirmBn('ব্যয় বাতিল', 'এই ব্যয়টি বাতিল করলে আর্থিক হিসাব থেকে বাদ যাবে। নিশ্চিত?', 'বাতিল করুন', true)
-                    .then(function (yes) {
-                      if (!yes) return;
-                      apiA('cancelExpenditure', { expenditureId: id })
-                        .then(function () { PHS.toast('ব্যয় বাতিল হয়েছে।'); draw(); },
-                          function (err) { PHS.toast(err.message || 'ব্যর্থ।', 'error'); });
-                    });
-                });
-              });
-            });
-          });
-        }
-
-        function openExpenditureForm(it) {
-          var F = [
-            { k: 'date', label: 'তারিখ *', type: 'date' },
-            { k: 'purpose', label: 'উদ্দেশ্য / কারণ *' },
-            { k: 'category', label: 'ক্যাটাগরি *', hint: 'যেমন Medical Camp, Relief, Administration' },
-            { k: 'amount', label: 'পরিমাণ (৳) *', type: 'number', min: 1, step: '0.01' },
-            { k: 'paymentMethod', label: 'পেমেন্ট মাধ্যম', type: 'select', options: EXP_METHODS },
-            { k: 'referenceNumber', label: 'Reference/Receipt (ঐচ্ছিক)' },
-            { k: 'description', label: 'বিস্তারিত বিবরণ (ঐচ্ছিক)', type: 'textarea', rows: 3 }
-          ];
-          var mm = modal(it ? 'ব্যয় এডিট করুন' : 'নতুন ব্যয় যুক্ত করুন',
-            '<form id="ef" novalidate>' +
-            F.map(function (f) {
-              var dflt = f.k === 'paymentMethod' ? 'CASH' : (f.k === 'date' ? PHS.dateKeyNowLocal() : '');
-              return fieldHtml(f, it ? it[f.k] : dflt);
-            }).join('') +
-            '<div class="form-actions"><button type="submit" class="btn btn-primary">সংরক্ষণ</button></div></form>');
-          var form = mm.body.querySelector('#ef');
-          function submit(extra) {
-            var bad = null;
-            var p = it ? { expenditureId: it.expenditureId } : {};
-            ['date', 'purpose', 'category'].forEach(function (k) {
-              var v = String(form.elements[k].value || '').trim();
-              if (!v) { fieldErr(form.elements[k], 'আবশ্যক।'); bad = bad || form.elements[k]; }
-              else fieldErr(form.elements[k], '');
-              p[k] = v;
-            });
-            var amt = Number(form.elements.amount.value);
-            if (!amt || amt <= 0) { fieldErr(form.elements.amount, 'সঠিক পরিমাণ দিন।'); bad = bad || form.elements.amount; }
-            else fieldErr(form.elements.amount, '');
-            p.amount = amt;
-            p.paymentMethod = form.elements.paymentMethod.value;
-            p.referenceNumber = String(form.elements.referenceNumber.value || '').trim();
-            p.description = String(form.elements.description.value || '').trim();
-            if (bad) { bad.focus(); return; }
-            if (extra) Object.assign(p, extra);
-            var action = it ? 'updateExpenditure' : 'addExpenditure';
-            apiA(action, p).then(function () {
-              PHS.toast(it ? 'ব্যয় হালনাগাদ হয়েছে।' : 'ব্যয় যুক্ত হয়েছে।'); mm.close(); draw();
-            }, function (err) {
-              if (!extra && err.code === 'POSSIBLE_DUPLICATE_EXPENDITURE') {
-                confirmBn('একই ধরনের ব্যয় পাওয়া গেছে', err.message, 'তবুও যুক্ত করুন', true).then(function (yes) {
-                  if (yes) submit({ confirmDuplicate: true });
-                });
-                return;
-              }
-              PHS.toast(err.message || 'ব্যর্থ।', 'error');
-            });
-          }
-          form.addEventListener('submit', function (e) { e.preventDefault(); submit(null); });
-        }
-
-        ['e-st', 'e-df', 'e-dt'].forEach(function (id) {
-          $('#' + id).addEventListener('change', function () {
-            state.status = $('#e-st').value; state.dateFrom = $('#e-df').value; state.dateTo = $('#e-dt').value;
-            state.page = 1; draw();
-          });
-        });
-        $('#e-cat').addEventListener('input', function () {
-          state.category = this.value.trim(); state.page = 1;
-          clearTimeout(window.__ect); window.__ect = setTimeout(draw, 350);
-        });
-        $('#e-q').addEventListener('input', function () {
-          state.search = this.value.trim(); state.page = 1;
-          clearTimeout(window.__eqt); window.__eqt = setTimeout(draw, 350);
-        });
-        $('#e-ref').addEventListener('click', draw);
-        $('#e-add').addEventListener('click', function () { openExpenditureForm(null); });
-        draw();
-      }
-
-      // ---------- Donation tab ----------
-      function initDonationTab(initialStatus) {
-        var state = { search: '', donorType: '', status: initialStatus || 'PENDING',
-                      dateFrom: '', dateTo: '', page: 1 };
-        donT.innerHTML =
-          '<div class="toolbar">' +
-          '<div class="field"><label for="o-q">খুঁজুন</label><input id="o-q"></div>' +
-          '<div class="field"><label for="o-dt2">দাতার ধরন</label><select id="o-dt2"><option value="">সব</option>' +
-          DONOR_TYPES.map(function (t) { return '<option value="' + t.v + '">' + t.l + '</option>'; }).join('') +
-          '</select></div>' +
-          '<div class="field"><label for="o-st">অবস্থা</label><select id="o-st">' +
-          ['PENDING', 'ACTIVE', 'REJECTED', 'CANCELLED', ''].map(function (s) {
-            return '<option value="' + s + '"' + (state.status === s ? ' selected' : '') + '>' +
-              (s ? (STATUS[s] ? STATUS[s].i + ' ' + STATUS[s].l : s) : 'সব') + '</option>';
-          }).join('') + '</select></div>' +
-          '<div class="field"><label for="o-df">তারিখ (থেকে)</label><input id="o-df" type="date"></div>' +
-          '<div class="field"><label for="o-dtt">তারিখ (পর্যন্ত)</label><input id="o-dtt" type="date"></div>' +
-          '<button type="button" class="btn btn-outline" id="o-ref">রিফ্রেশ</button>' +
-          '<button type="button" class="btn btn-primary" id="o-add">+ নতুন অনুদান</button></div>' +
-          '<p class="step-note">সদস্যরা Payment পেজ থেকে নিজে অনুদান জমা দিলে তা প্রথমে <b>PENDING</b> অবস্থায় আসে — এখানে অনুমোদন/প্রত্যাখ্যান করুন। Admin নিজে "+ নতুন অনুদান" দিয়ে যোগ করলে তা সরাসরি সক্রিয় থাকে।</p>' +
-          '<div id="o-total" class="sum-band"></div>' +
-          '<div id="o-list"></div><div id="o-pager"></div>';
-
-        function draw() {
-          loadInto($('#o-list'), function () {
-            return apiA('getDonationsAdmin', {
-              search: state.search, donorType: state.donorType, status: state.status,
-              dateFrom: state.dateFrom, dateTo: state.dateTo, page: state.page, pageSize: 15
-            }).then(function (r) {
-              $('#o-total').innerHTML =
-                '<span>সদস্য অনুদান: <b>' + PHS.bdt(r.data.totalMemberDonation) + '</b></span>' +
-                '<span>বহিরাগত/প্রাতিষ্ঠানিক: <b>' + PHS.bdt(r.data.totalNonMemberDonation) + '</b></span>' +
-                '<span>মোট (সক্রিয়): <b>' + PHS.bdt(r.data.totalActiveAmount) + '</b></span>';
-              table($('#o-list'), [
-                { k: 'date', label: 'তারিখ', fmt: function (d) { return esc(PHS.dateLabel(d.date)); } },
-                { k: 'donorType', label: 'দাতার ধরন', fmt: function (d) { return esc(donorTypeLabel(d.donorType)); } },
-                { k: 'donorName', label: 'দাতা', fmt: function (d) {
-                    return esc(d.donorName) + (d.donorType === 'MEMBER' && d.memberId ?
-                      ' <span class="muted small mono">(' + esc(d.memberId) + ')</span>' : ''); } },
-                { k: 'status', label: 'অবস্থা', fmt: function (d) { return badge(d.status); } },
-                { k: 'act', label: 'অ্যাকশন', fmt: function (d) {
-                    if (d.status === 'PENDING') {
-                      return '<div class="actions">' +
-                        '<button type="button" class="btn mini" data-appr="' + esc(d.donationId) +
-                        '" style="background:var(--green-600);color:#fff">অনুমোদন</button>' +
-                        '<button type="button" class="btn btn-outline mini" data-rej="' + esc(d.donationId) +
-                        '">প্রত্যাখ্যান</button></div>';
-                    }
-                    var h = '<div class="actions"><button type="button" class="btn btn-outline mini" data-e="' +
-                      esc(d.donationId) + '">এডিট</button>';
-                    if (d.status === 'ACTIVE') {
-                      h += '<button type="button" class="btn mini" data-c="' + esc(d.donationId) +
-                        '" style="background:var(--danger);color:#fff">বাতিল</button>';
-                    }
-                    return h + '</div>'; } }
-              ], r.data.items, 'কোনো অনুদান পাওয়া যায়নি।');
-              pager($('#o-pager'), r.data.page, r.data.totalPages, function (p) { state.page = p; draw(); });
-              $('#o-list').querySelectorAll('[data-e]').forEach(function (b) {
-                b.addEventListener('click', function () {
-                  var it = r.data.items.filter(function (x) { return x.donationId === b.getAttribute('data-e'); })[0];
-                  openDonationForm(it);
-                });
-              });
-              $('#o-list').querySelectorAll('[data-c]').forEach(function (b) {
-                b.addEventListener('click', function () {
-                  var id = b.getAttribute('data-c');
-                  confirmBn('অনুদান বাতিল', 'এই অনুদানটি বাতিল করলে আর্থিক হিসাব থেকে বাদ যাবে। নিশ্চিত?', 'বাতিল করুন', true)
-                    .then(function (yes) {
-                      if (!yes) return;
-                      apiA('cancelDonation', { donationId: id })
-                        .then(function () { PHS.toast('অনুদান বাতিল হয়েছে।'); draw(); },
-                          function (err) { PHS.toast(err.message || 'ব্যর্থ।', 'error'); });
-                    });
-                });
-              });
-              $('#o-list').querySelectorAll('[data-appr]').forEach(function (b) {
-                b.addEventListener('click', function () {
-                  var id = b.getAttribute('data-appr');
-                  apiA('approveDonation', { donationId: id })
-                    .then(function () { PHS.toast('অনুদান অনুমোদিত হয়েছে।'); draw(); },
-                      function (err) { PHS.toast(err.message || 'ব্যর্থ।', 'error'); });
-                });
-              });
-              $('#o-list').querySelectorAll('[data-rej]').forEach(function (b) {
-                b.addEventListener('click', function () {
-                  var id = b.getAttribute('data-rej');
-                  var mm = modal('অনুদান প্রত্যাখ্যান',
-                    '<form id="rjf" novalidate>' +
-                    fieldHtml({ k: 'adminNote', label: 'কারণ *', type: 'textarea', rows: 3,
-                      hint: 'সদস্য এই কারণ দেখতে পাবেন।' }, '') +
-                    '<div class="form-actions"><button type="submit" class="btn btn-primary">প্রত্যাখ্যান করুন</button></div></form>');
-                  mm.body.querySelector('#rjf').addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    var reason = String(this.elements.adminNote.value || '').trim();
-                    if (!reason) { fieldErr(this.elements.adminNote, 'কারণ আবশ্যক।'); return; }
-                    apiA('rejectDonation', { donationId: id, adminNote: reason })
-                      .then(function () { PHS.toast('অনুদান প্রত্যাখ্যাত হয়েছে।'); mm.close(); draw(); },
-                        function (err) { PHS.toast(err.message || 'ব্যর্থ।', 'error'); });
-                  });
-                });
-              });
-            });
-          });
-        }
-
-        function openDonationForm(it) {
-          var isMember = it ? it.donorType === 'MEMBER' : true;
-          var html =
-            '<form id="of" novalidate>' +
-            fieldHtml({ k: 'date', label: 'তারিখ *', type: 'date' }, it ? it.date : PHS.dateKeyNowLocal()) +
-            fieldHtml({ k: 'donorType', label: 'দাতার ধরন *', type: 'select', options: DONOR_TYPES },
-              it ? it.donorType : 'MEMBER') +
-            '<div class="field" id="of-mem-wrap"' + (isMember ? '' : ' hidden') + '>' +
-            '<label>সদস্য</label><input id="of-mem-q" placeholder="নাম/কোড দিয়ে খুঁজুন" value="' +
-            (isMember && it ? esc(it.donorName) : '') + '">' +
-            '<div id="of-mem-results" class="hint"></div><span class="err"></span></div>' +
-            '<div class="field" id="of-name-wrap"' + (isMember ? ' hidden' : '') + '>' +
-            fieldHtml({ k: 'donorName', label: 'দাতার নাম *' }, !isMember && it ? it.donorName : '') + '</div>' +
-            fieldHtml({ k: 'purpose', label: 'উদ্দেশ্য (ঐচ্ছিক)' }, it ? it.purpose : '') +
-            fieldHtml({ k: 'amount', label: 'পরিমাণ (৳) *', type: 'number', min: 1, step: '0.01' }, it ? it.amount : '') +
-            fieldHtml({ k: 'paymentMethod', label: 'পেমেন্ট মাধ্যম', type: 'select', options: DON_METHODS },
-              it ? it.paymentMethod : 'CASH') +
-            fieldHtml({ k: 'referenceNumber', label: 'Reference (ঐচ্ছিক)' }, it ? it.referenceNumber : '') +
-            fieldHtml({ k: 'description', label: 'বিস্তারিত বিবরণ (ঐচ্ছিক)', type: 'textarea', rows: 3 }, it ? it.description : '') +
-            '<div class="form-actions"><button type="submit" class="btn btn-primary">সংরক্ষণ</button></div></form>';
-          var mm = modal(it ? 'অনুদান এডিট করুন' : 'নতুন অনুদান যুক্ত করুন', html);
-          var form = mm.body.querySelector('#of');
-          var selectedMemberId = isMember && it ? it.memberId : '';
-          var memWrap = mm.body.querySelector('#of-mem-wrap'), nameWrap = mm.body.querySelector('#of-name-wrap');
-          var memQ = mm.body.querySelector('#of-mem-q'), memResults = mm.body.querySelector('#of-mem-results');
-          form.elements.donorType.addEventListener('change', function () {
-            var v = form.elements.donorType.value;
-            memWrap.hidden = v !== 'MEMBER'; nameWrap.hidden = v === 'MEMBER';
-            if (v !== 'MEMBER') selectedMemberId = '';
-          });
-          var searchT;
-          memQ.addEventListener('input', function () {
-            selectedMemberId = '';
-            var q = memQ.value.trim();
-            clearTimeout(searchT);
-            if (q.length < 2) { memResults.innerHTML = ''; return; }
-            searchT = setTimeout(function () {
-              apiA('getMembers', { search: q, page: 1, pageSize: 6 }).then(function (r) {
-                memResults.innerHTML = (r.data.items || []).map(function (m) {
-                  return '<button type="button" class="chip mini" data-mid="' + esc(m.memberId) + '" data-mname="' +
-                    esc(m.nameBn || m.nameEn || m.memberCode) + '">' +
-                    esc(m.memberCode + ' — ' + (m.nameBn || m.nameEn)) + '</button>';
-                }).join(' ') || '<span class="muted small">কোনো মিল পাওয়া যায়নি।</span>';
-                memResults.querySelectorAll('[data-mid]').forEach(function (b) {
-                  b.addEventListener('click', function () {
-                    selectedMemberId = b.getAttribute('data-mid');
-                    memQ.value = b.getAttribute('data-mname');
-                    memResults.innerHTML = '<span class="muted small">নির্বাচিত ✓</span>';
-                  });
-                });
-              }).catch(function () {});
-            }, 300);
-          });
-          function submit(extra) {
-            var bad = null;
-            var p = it ? { donationId: it.donationId } : {};
-            p.date = String(form.elements.date.value || '').trim();
-            if (!p.date) { fieldErr(form.elements.date, 'আবশ্যক।'); bad = form.elements.date; }
-            else fieldErr(form.elements.date, '');
-            p.donorType = form.elements.donorType.value;
-            if (p.donorType === 'MEMBER') {
-              if (!selectedMemberId) { fieldErr(memQ, 'তালিকা থেকে একজন সদস্য নির্বাচন করুন।'); bad = bad || memQ; }
-              else { p.memberId = selectedMemberId; fieldErr(memQ, ''); }
-            } else {
-              p.donorName = String(form.elements.donorName.value || '').trim();
-              if (!p.donorName) { fieldErr(form.elements.donorName, 'আবশ্যক।'); bad = bad || form.elements.donorName; }
-              else fieldErr(form.elements.donorName, '');
-            }
-            p.purpose = String(form.elements.purpose.value || '').trim();
-            var amt = Number(form.elements.amount.value);
-            if (!amt || amt <= 0) { fieldErr(form.elements.amount, 'সঠিক পরিমাণ দিন।'); bad = bad || form.elements.amount; }
-            else fieldErr(form.elements.amount, '');
-            p.amount = amt;
-            p.paymentMethod = form.elements.paymentMethod.value;
-            p.referenceNumber = String(form.elements.referenceNumber.value || '').trim();
-            p.description = String(form.elements.description.value || '').trim();
-            if (bad) { bad.focus(); return; }
-            if (extra) Object.assign(p, extra);
-            var action = it ? 'updateDonation' : 'addDonation';
-            apiA(action, p).then(function () {
-              PHS.toast(it ? 'অনুদান হালনাগাদ হয়েছে।' : 'অনুদান যুক্ত হয়েছে।'); mm.close(); draw();
-            }, function (err) {
-              if (!extra && err.code === 'POSSIBLE_DUPLICATE_DONATION') {
-                confirmBn('একই ধরনের অনুদান পাওয়া গেছে', err.message, 'তবুও যুক্ত করুন', true).then(function (yes) {
-                  if (yes) submit({ confirmDuplicate: true });
-                });
-                return;
-              }
-              PHS.toast(err.message || 'ব্যর্থ।', 'error');
-            });
-          }
-          form.addEventListener('submit', function (e) { e.preventDefault(); submit(null); });
-        }
-
-        ['o-dt2', 'o-st', 'o-df', 'o-dtt'].forEach(function (id) {
-          $('#' + id).addEventListener('change', function () {
-            state.donorType = $('#o-dt2').value; state.status = $('#o-st').value;
-            state.dateFrom = $('#o-df').value; state.dateTo = $('#o-dtt').value;
-            state.page = 1; draw();
-          });
-        });
-        $('#o-q').addEventListener('input', function () {
-          state.search = this.value.trim(); state.page = 1;
-          clearTimeout(window.__oqt); window.__oqt = setTimeout(draw, 350);
-        });
-        $('#o-ref').addEventListener('click', draw);
-        $('#o-add').addEventListener('click', function () { openDonationForm(null); });
-        draw();
-      }
-
-      // §Donation Details entry point: dashboard.html's "মোট অনুদান" card
-      // links here with ?tab=donation — land straight on the Donation tab,
-      // pre-filtered to ACTIVE (matching the total that card showed),
-      // instead of the tab's own PENDING-moderation default.
-      if (/[?&]tab=donation\b/.test(location.search)) { ftab(3, { status: 'ACTIVE' }); }
-      else { ftab(1); }
-    },
-
     // ---------------- reports (§72 payments/methods + §73 export) ----------------
     reports: function (root) {
       root.innerHTML =
@@ -1461,8 +900,6 @@
         '<option value="monthlyChanda">মাসিক চাঁদা (চলতি মাস)</option>' +
         '<option value="memberDues">সদস্য বকেয়া</option>' +
         '<option value="paymentMethods">পেমেন্ট মাধ্যম</option>' +
-        '<option value="expenditure">ব্যয় (Expenditure)</option>' +
-        '<option value="donations">অনুদান (Donation)</option>' +
         '<option value="auditLogs">অডিট লগ</option></select></div>' +
         '<button type="button" class="btn btn-primary" id="ex-go">⬇️ ডাউনলোড</button>' +
         '<span class="hint">সংবেদনশীল ডেটা — শুধুমাত্র অনুমোদিত অ্যাডমিন। প্রতিটি এক্সপোর্ট অডিট হয়।</span></div></div>';
@@ -1526,19 +963,20 @@
         '<div id="cm-list"></div><div id="cm-pager"></div>';
       function rowActs(it) {
         var pub = String(it.publicationStatus || '');
+        var rid = esc(it[M.idField]);            // FIXED: was it.id → "id is invalid."
         var h = '<div class="actions">' +
-          '<button type="button" class="btn btn-outline mini" data-e="' + esc(it.id) + '">এডিট</button>';
+          '<button type="button" class="btn btn-outline mini" data-e="' + rid + '">এডিট</button>';
         if (M.previewUrl) {
           h += '<a class="btn btn-outline mini" target="_blank" rel="noopener" href="' +
             esc(M.previewUrl(it)) + '">প্রিভিউ</a>';
         }
         if (pub !== 'PUBLISHED') {
-          h += '<button type="button" class="btn btn-primary mini" data-p="' + esc(it.id) + '">প্রকাশ</button>';
+          h += '<button type="button" class="btn btn-primary mini" data-p="' + rid + '">প্রকাশ</button>';
         } else {
-          h += '<button type="button" class="btn btn-outline mini" data-u="' + esc(it.id) + '">আনপাবলিশ</button>';
+          h += '<button type="button" class="btn btn-outline mini" data-u="' + rid + '">আনপাবলিশ</button>';
         }
         if (pub !== 'ARCHIVED') {
-          h += '<button type="button" class="btn mini" data-x="' + esc(it.id) +
+          h += '<button type="button" class="btn mini" data-x="' + rid +
             '" style="background:var(--danger);color:#fff">আর্কাইভ</button>';
         }
         return h + '</div>';
@@ -2075,10 +1513,7 @@
 
       $('#mg-prev').addEventListener('click', function () {
         loadInto($('#mg-prev-out'), function () {
-          return apiA('migrationPreview', {}).then(function (r) {
-            show($('#mg-prev-out'), r);
-            return r;
-          });
+          return apiA('migrationPreview', {});
         });
       });
 
@@ -2089,7 +1524,6 @@
           if (!yes) return;
           loadInto($('#mg-imp-out'), function () {
             return apiA('migrationImport', {}).then(function (r) {
-              show($('#mg-imp-out'), r);
               PHS.toast(PHS.bnNumber(r.data.imported || 0) + ' রেকর্ড ইম্পোর্ট হয়েছে।');
               return r;
             });
@@ -2099,10 +1533,7 @@
 
       $('#mg-rec').addEventListener('click', function () {
         loadInto($('#mg-rec-out'), function () {
-          return apiA('migrationReconcile', {}).then(function (r) {
-            show($('#mg-rec-out'), r);
-            return r;
-          });
+          return apiA('migrationReconcile', {});
         });
       });
 
@@ -2212,7 +1643,7 @@
         { k: 'description', label: 'বিস্তারিত বিবরণ', type: 'textarea', rows: 6 },
         { k: 'imageUrl', label: 'ছবি', type: 'image', purpose: 'activity' }] },
     services: { key: 'services', title: 'সেবা', idField: 'serviceId',
-      previewUrl: function () { return BASE + 'services.html'; },
+      previewUrl: function (it) { return BASE + 'service-details.html?id=' + encodeURIComponent(it.serviceId); },
       listExtra: [{ k: 'icon', label: 'আইকন' }],
       fields: [
         { k: 'title', label: 'শিরোনাম *' },
@@ -2339,13 +1770,6 @@
     PHS.monthKeyNowLocal = function () {
       var d = new Date();
       return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2);
-    };
-  }
-  /** §Finance: default "today" for date inputs on the Expenditure/Donation forms. */
-  if (!PHS.dateKeyNowLocal) {
-    PHS.dateKeyNowLocal = function () {
-      var d = new Date();
-      return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
     };
   }
 })();

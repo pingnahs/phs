@@ -57,6 +57,7 @@
 .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:.85rem;margin-bottom:1.4rem}
 @media(min-width:760px){.cards{grid-template-columns:repeat(4,1fr)}}
 .cards .stat{cursor:default;animation:none}
+.cards .stat-clickable{cursor:pointer}
 
 /* ---- toolbar ---- */
 .toolbar{display:flex;gap:.7rem;flex-wrap:wrap;align-items:end;margin-bottom:1.1rem;
